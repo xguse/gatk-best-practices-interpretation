@@ -1,0 +1,16 @@
+COMMON:
+    RUN_NAME: name_me
+    OUT_DIR_LOCATION: "/path/to/where/you/want/out_dir/to/be/put"
+
+
+# --------------------------------------
+RULE_PYSCRIPT:
+    SETTING1: ''
+    IN_FILE1: ''
+    IN_FILE2: ''
+
+# --------------------------------------
+RULE_RSCRIPT:
+    SETTINGA: ''
+    IN_FILEA: ''
+    IN_FILEB: ''

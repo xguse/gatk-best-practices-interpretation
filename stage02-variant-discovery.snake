@@ -1,0 +1,122 @@
+"""Snakemake file."""
+
+# See tutorial at: http://tiny.cc/snakemake_tutorial
+
+import os
+
+import yaml
+
+import pandas as pd
+import numpy as np
+
+from matplotlib import pyplot as plt
+import seaborn as sns
+sns.set_style("whitegrid")
+
+from python.functions import *
+
+ORIGINAL_CONFIG_AS_STRING = yaml.dump(config, default_flow_style=False)
+
+
+#### COMMON RUN SPECIFICS ####
+
+RUN_NAME = config["COMMON"]["RUN_NAME"]
+OUT_DIR = "{base_dir}/{run_name}".format(base_dir=config["COMMON"]["OUT_DIR_LOCATION"], run_name=RUN_NAME)
+
+
+
+
+############ BEGIN PIPELINE RULES ############
+
+
+#### SAVE_RUN_CONFIG ####
+SAVE_RUN_CONFIG_OUT = OUT_DIR+"/{RUN_NAME}.yaml".format(RUN_NAME=RUN_NAME)
+
+rule save_run_config:
+    input:
+    output:
+        file=SAVE_RUN_CONFIG_OUT
+
+    run:
+        with open(output.file, 'w') as cnf_out:
+            cnf_out.write(ORIGINAL_CONFIG_AS_STRING)
+
+
+# ------------------------- #
+#### RULE_PYSCRIPT ####
+RULE_PYSCRIPT = config["RULE_PYSCRIPT"]
+
+# params
+SETTING1 = RULE_PYSCRIPT["SETTING1"]
+
+# inputs
+IN_FILE1 = RULE_PYSCRIPT["IN_FILE1"]
+IN_FILE2 = RULE_PYSCRIPT["IN_FILE2"]
+
+# outputs
+RULE_PYSCRIPT_OUT = OUT_DIR+"/RULE_PYSCRIPT"
+
+OUT_FILE1 = RULE_PYSCRIPT_OUT+'/out_file1.csv'
+OUT_FILE2 = RULE_PYSCRIPT_OUT+'/out_file2.txt'
+
+
+# ---
+rule rule_pyscript:
+    params:
+        setting1=SETTING1,
+
+    input:
+        in_file1=IN_FILE1,
+        in_file2=IN_FILE2
+    output:
+        out_file1=OUT_FILE1,
+        out_file2=OUT_FILE2,
+
+    script:
+        "python/scripts/rule_pyscript.py"
+
+
+# ------------------------- #
+#### RULE_RSCRIPT ####
+RULE_RSCRIPT = config["RULE_RSCRIPT"]
+
+# params
+SETTINGA = RULE_RSCRIPT["SETTINGA"]
+
+# inputs
+IN_FILEA = RULE_RSCRIPT["IN_FILEA"]
+IN_FILEB = RULE_RSCRIPT["IN_FILEB"]
+
+# outputs
+RULE_RSCRIPT_OUT = OUT_DIR+"/rule_rscript"
+
+OUT_FILEA = RULE_RSCRIPT_OUT+'/out_filea.csv'
+OUT_FILEB = RULE_RSCRIPT_OUT+'/out_fileb.txt'
+
+
+# ---
+rule rule_rscript:
+    params:
+        settinga=SETTINGA,
+
+    input:
+        in_filea=IN_FILEA,
+        in_fileb=IN_FILEB
+    output:
+        out_filea=OUT_FILEA,
+        out_fileb=OUT_FILEB,
+
+    script:
+        "r/scripts/rule_rscript.R"
+
+
+
+#### ALL ####
+input_all = [rules.save_run_config.output,
+             rules.rule_pyscript.output,
+             rules.rule_rscript.output,
+             ]
+# ---
+rule all:
+    input:
+        input_all

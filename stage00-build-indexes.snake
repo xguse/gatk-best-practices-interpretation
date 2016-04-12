@@ -1,0 +1,114 @@
+"""Snakemake file."""
+
+# See tutorial at: http://tiny.cc/snakemake_tutorial
+
+import os
+
+import yaml
+
+import pandas as pd
+import numpy as np
+
+from matplotlib import pyplot as plt
+import seaborn as sns
+sns.set_style("whitegrid")
+
+from python.functions import *
+
+ORIGINAL_CONFIG_AS_STRING = yaml.dump(config, default_flow_style=False)
+
+
+#### COMMON RUN SPECIFICS ####
+
+RUN_NAME = config["COMMON"]["RUN_NAME"]
+OUT_DIR = "{base_dir}/{run_name}".format(base_dir=config["COMMON"]["OUT_DIR_LOCATION"], run_name=RUN_NAME)
+
+
+
+
+############ BEGIN PIPELINE RULES ############
+
+
+#### SAVE_RUN_CONFIG ####
+SAVE_RUN_CONFIG_OUT = OUT_DIR+"/{RUN_NAME}.yaml".format(RUN_NAME=RUN_NAME)
+
+rule save_run_config:
+    input:
+    output:
+        file=SAVE_RUN_CONFIG_OUT
+
+    run:
+        with open(output.file, 'w') as cnf_out:
+            cnf_out.write(ORIGINAL_CONFIG_AS_STRING)
+
+
+# ------------------------- #
+#### BWA_INDEX ####
+BWA_INDEX = config["BWA_INDEX"]
+
+
+BWA_INDEX_EXTS = ["amb",
+                  "ann",
+                  "bwt",
+                  "pac",
+                  "sa",]
+# params
+
+# input
+REF_FASTA = BWA_INDEX["REF_FASTA"]
+
+
+# output
+BWA_INDEX_OUT_FILES = ["{REF_FASTA}.{EXT}".format(REF_FASTA=REF_FASTA, EXT=ext) for ext in BWA_INDEX_EXTS]
+
+# ---
+rule bwa_index:
+    input:
+        ref_fasta=REF_FASTA,
+
+    output: BWA_INDEX_OUT_FILES
+
+    shell:
+        """bwa index -a bwtsw {input.ref_fasta}"""
+
+
+# ------------------------- #
+
+#### SAMTOOLS_FAIDX ####
+SAMTOOLS_FAIDX = config["BWA_INDEX"]
+
+SAMTOOLS_FAIDX_EXTS = ["fai",]
+
+# params
+
+# input
+REF_FASTA = SAMTOOLS_FAIDX["REF_FASTA"]
+
+
+# output
+SAMTOOLS_FAIDX_OUT_FILES = ["{REF_FASTA}.{EXT}".format(REF_FASTA=REF_FASTA, EXT=ext) for ext in SAMTOOLS_FAIDX_EXTS]
+
+# ---
+rule samtools_faidx:
+    input:
+        ref_fasta=REF_FASTA,
+
+    output: SAMTOOLS_FAIDX_OUT_FILES
+
+    shell:
+        """samtools faidx {input.ref_fasta}"""
+
+
+# ------------------------- #
+
+
+
+#### ALL ####
+input_all = [rules.save_run_config.output,
+             rules.bwa_index.output,
+             rules.samtools_faidx.output,
+             ]
+# ---
+rule all:
+    input:
+        input_all

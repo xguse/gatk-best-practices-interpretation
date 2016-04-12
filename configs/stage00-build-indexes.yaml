@@ -1,0 +1,22 @@
+COMMON:
+    RUN_NAME: gatk_pipe_build_chrX
+    OUT_DIR_LOCATION: "/run/media/gus/Storage/BCH/data/gatk_pipeline_output"
+    # REF_FASTA: &ref_fasta /run/media/gus/Storage/BCH/data/ensembl/homo_sapiens/Homo_sapiens.GRCh38.dna.toplevel.fa
+    REF_FASTA: &ref_fasta /run/media/gus/Storage/BCH/data/ensembl/homo_sapiens/Homo_sapiens.GRCh38.dna.chromosome.X.fa
+
+# --------------------------------------
+BWA_INDEX:
+    REF_FASTA: *ref_fasta
+
+# --------------------------------------
+SAMTOOLS_FAIDX:
+    REF_FASTA: *ref_fasta
+
+# --------------------------------------
+
+CREATE_SEQ_DICT:
+    SETTING1: ''
+    IN_FILE1: ''
+    IN_FILE2: ''
+
+# --------------------------------------
